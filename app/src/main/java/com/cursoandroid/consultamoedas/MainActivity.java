@@ -4,14 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.cursoandroid.consultamoedas.model.Moeda;
+import com.google.android.material.textfield.TextInputEditText;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,22 +29,41 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnExecutar;
-    private TextView txtResultado;
     private List<Moeda> moedas = new ArrayList<>();
     private String metodo = "";
+    private Spinner spinner;
+    private TextView txtResultado;
+    private Button btnConversão;
+    private TextInputEditText txtValor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnExecutar = findViewById(R.id.btnExecutar);
+        spinner = findViewById(R.id.spinner);
         txtResultado = findViewById(R.id.txtResultado);
+        btnConversão = findViewById(R.id.btnConversao);
+        txtValor = findViewById(R.id.txtValor);
 
         carregarOpcoes();
+
+        btnConversão.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                converter();
+            }
+        });
     }
 
+    public void converter(){
+        Double valor = Double.parseDouble(txtValor.getText().toString());
+        Moeda moeda = (Moeda) spinner.getSelectedItem();
+        Double valorMoeda = Double.parseDouble(moeda.getBid());
+        Double total = valor*valorMoeda;
+        txtResultado.setText(moeda.getCode()+" está cotado atualmente em R$"+valorMoeda+"\n\nO valor informado em "+moeda.getCode()+
+                " corresponde a R$"+total);
+    }
     public void carregarOpcoes(){
         MyTask task = new MyTask();
         String urlApi = "https://economia.awesomeapi.com.br/json/all";
@@ -102,13 +122,16 @@ public class MainActivity extends AppCompatActivity {
                         String name = jsonObject1.getString("name");
                         String code = jsonObject1.getString("code");
                         String bid = jsonObject1.getString("bid");
-                        Moeda moeda = new Moeda(name, code, bid);
+                        Moeda moeda = new Moeda(code, name, bid);
                         moedas.add(moeda);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
+                ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, moedas);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(adapter);
             }
         }
     }

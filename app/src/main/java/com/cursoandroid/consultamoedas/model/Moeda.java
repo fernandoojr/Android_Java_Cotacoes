@@ -36,4 +36,9 @@ public class Moeda {
     public void setBid(String bid) {
         this.bid = bid;
     }
+
+    @Override
+    public String toString(){
+        return code + " - " + name;
+    }
 }
