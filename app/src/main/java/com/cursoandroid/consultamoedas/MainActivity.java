@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,9 +61,17 @@ public class MainActivity extends AppCompatActivity {
         Double valor = Double.parseDouble(txtValor.getText().toString());
         Moeda moeda = (Moeda) spinner.getSelectedItem();
         Double valorMoeda = Double.parseDouble(moeda.getBid());
+        if (moeda.getCode().equals("ETH")){
+            valorMoeda = valorMoeda * 10;
+        }else if(moeda.getCode().equals("BTC")){
+            valorMoeda = valorMoeda*1000;
+        }
         Double total = valor*valorMoeda;
-        txtResultado.setText(moeda.getCode()+" está cotado atualmente em R$"+valorMoeda+"\n\nO valor informado em "+moeda.getCode()+
-                " corresponde a R$"+total);
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+        txtResultado.setText(moeda.getCode()+" está cotado atualmente em R$"+decimalFormat.format(valorMoeda)+"\n\nO valor informado em "
+                +moeda.getCode()+ " corresponde a R$"+decimalFormat.format(total));
     }
     public void carregarOpcoes(){
         MyTask task = new MyTask();
