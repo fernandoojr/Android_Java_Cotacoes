@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.cursoandroid.consultamoedas.model.Moeda;
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtResultado;
     private Button btnConversão;
     private TextInputEditText txtValor;
+    private Double valorInformado = 0.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,21 +60,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void converter(){
-        Double valor = Double.parseDouble(txtValor.getText().toString());
+
+        valorInformado = Double.parseDouble(txtValor.getText().toString());
         Moeda moeda = (Moeda) spinner.getSelectedItem();
-        Double valorMoeda = Double.parseDouble(moeda.getBid());
-        if (moeda.getCode().equals("ETH")){
-            valorMoeda = valorMoeda * 10;
-        }else if(moeda.getCode().equals("BTC")){
-            valorMoeda = valorMoeda*1000;
-        }
-        Double total = valor*valorMoeda;
 
-        DecimalFormat decimalFormatMoeda = new DecimalFormat("0.00##");
-        DecimalFormat decimalFormatConversao = new DecimalFormat("0.00");
+        MyTask task = new MyTask();
+        String urlApi = "https://economia.awesomeapi.com.br/json/"+moeda.getCode();
+        metodo = "unico";
+        task.execute(urlApi);
 
-        txtResultado.setText(moeda.getCode()+" está cotado atualmente em R$"+decimalFormatMoeda.format(valorMoeda)+"\n\nO valor informado em "
-                +moeda.getCode()+ " corresponde a aproximadamente R$"+decimalFormatConversao.format(total));
     }
     public void carregarOpcoes(){
         MyTask task = new MyTask();
@@ -131,8 +127,7 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject jsonObject1 = jsonObject.getJSONObject(aux);
                         String name = jsonObject1.getString("name");
                         String code = jsonObject1.getString("code");
-                        String bid = jsonObject1.getString("bid");
-                        Moeda moeda = new Moeda(code, name, bid);
+                        Moeda moeda = new Moeda(code, name);
                         moedas.add(moeda);
                     }
                 } catch (JSONException e) {
@@ -142,6 +137,28 @@ public class MainActivity extends AppCompatActivity {
                 ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, moedas);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinner.setAdapter(adapter);
+            }else if (metodo.equals("unico")){
+                try {
+                    JSONArray jsonArray = new JSONArray(s);
+                    JSONObject jsonObject = new JSONObject(jsonArray.getJSONObject(0).toString());
+
+                    Double valorMoeda = Double.parseDouble(jsonObject.getString("bid"));
+                    String code = jsonObject.getString("code");
+                    if (code.equals("ETH")) {
+                        valorMoeda = valorMoeda * 10;
+                    } else if (code.equals("BTC")) {
+                        valorMoeda = valorMoeda * 1000;
+                    }
+                    Double total = valorInformado * valorMoeda;
+
+                    DecimalFormat decimalFormatMoeda = new DecimalFormat("0.00##");
+                    DecimalFormat decimalFormatConversao = new DecimalFormat("0.00");
+
+                    txtResultado.setText(code + " está cotado atualmente em R$" + decimalFormatMoeda.format(valorMoeda) + "\n\nO valor informado em "
+                            + code + " corresponde a aproximadamente R$" + decimalFormatConversao.format(total));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
