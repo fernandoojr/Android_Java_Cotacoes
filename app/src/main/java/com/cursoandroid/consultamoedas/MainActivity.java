@@ -68,10 +68,11 @@ public class MainActivity extends AppCompatActivity {
         }
         Double total = valor*valorMoeda;
 
-        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        DecimalFormat decimalFormatMoeda = new DecimalFormat("0.00##");
+        DecimalFormat decimalFormatConversao = new DecimalFormat("0.00");
 
-        txtResultado.setText(moeda.getCode()+" está cotado atualmente em R$"+decimalFormat.format(valorMoeda)+"\n\nO valor informado em "
-                +moeda.getCode()+ " corresponde a R$"+decimalFormat.format(total));
+        txtResultado.setText(moeda.getCode()+" está cotado atualmente em R$"+decimalFormatMoeda.format(valorMoeda)+"\n\nO valor informado em "
+                +moeda.getCode()+ " corresponde a aproximadamente R$"+decimalFormatConversao.format(total));
     }
     public void carregarOpcoes(){
         MyTask task = new MyTask();
